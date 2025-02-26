@@ -1,16 +1,43 @@
-import subprocess
+import schedule
+import json
+import os
+from datetime import datetime
+from git_operations import commit_and_push
 
-def commit_and_push(repo_path, branch_name, commit_message):
-  try:
-    result = subprocess.run(["git", "add", "."], cwd=repo_path, check=True, capture_output=True, text=True)
-    print(result.stdout, result.stderr)
+if not os.path.exists("data"):
+    os.makedirs("data")
 
-    result = subprocess.run(["git", "commit", "-m", commit_message], cwd=repo_path, check=True, capture_output=True, text=True)
-    print(result.stdout, result.stderr)
+HISTORY_FILE = "data/commit_history.json"
 
-    result = subprocess.run(["git", "push", "origin", branch_name], cwd=repo_path, check=True, capture_output=True, text=True)
-    print(result.stdout, result.stderr)
+def save_commit_history(repo_path, branch_name, commit_message, commit_time):
+  """Save commit details to a JSON file for future reference."""
+  history = load_commit_history()
+  history.append({
+    "repo_path": repo_path,
+    "branch_name": branch_name,
+    "commit_message": commit_message,
+    "commit_time": commit_time,
+    "scheduled_at": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+  })
+  with open(HISTORY_FILE, "w") as f:
+    json.dump(history, f, indent=2)
 
-    print(f"Successfully committed and pushed to {branch_name}.")
-  except subprocess.CalledProcessError as e:
-    print(f"Error: {e.stderr}")
+def load_commit_history():
+  """Load commit history from a JSON file."""
+  if not os.path.exists(HISTORY_FILE):
+    return []
+  with open(HISTORY_FILE, "r") as f:
+    return json.load(f)
+
+def schedule_commit(repo_path, branch_name, commit_message, commit_time, files_to_commit):
+  """Schedules a commit and saves it to history."""
+  if not files_to_commit:
+    print("Error: No files selected for commit. Aborting.")
+    return False
+
+  schedule.every().day.at(commit_time).do(
+    commit_and_push, repo_path=repo_path, branch_name=branch_name, commit_message=commit_message, files_to_commit=files_to_commit
+  )
+  
+  save_commit_history(repo_path, branch_name, commit_message, commit_time)
+  return True
