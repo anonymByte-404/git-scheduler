@@ -2,7 +2,7 @@
 
 <p align="center">
   <img src="https://img.shields.io/badge/License-MIT-blue.svg" alt="License"/>
-  <img src="https://img.shields.io/badge/Git--Scheduler-1.2.0-yellowgreen.svg" alt="Git Scheduler Version" />
+  <img src="https://img.shields.io/badge/Git--Scheduler-1.2.1-yellowgreen.svg" alt="Git Scheduler Version" />
   <img src="https://img.shields.io/badge/schedule-1.2.2-green.svg" alt="Schedule Version">
 </p>
 
